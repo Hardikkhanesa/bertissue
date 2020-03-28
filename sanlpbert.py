@@ -38,7 +38,7 @@ class BertAnalyzer():
     tokenizer = create_tokenizer_from_hub_module()
     '''
     # We'll set sequences to be at most 128 tokens long.
-    self.MAX_SEQ_LENGTH = 128
+    self.MAX_SEQ_LENGTH = 256
     
     with open("bert_tokenizer.pickle","rb") as handle:
       self.tokenizer = pickle.load(handle) 
@@ -56,7 +56,7 @@ class BertAnalyzer():
     self.n_estimator = tf.estimator.Estimator(
       model_fn=model_fn,
       config=run_config,
-      params={"batch_size": 1})
+      params={"batch_size": 32})
 
 
 
@@ -200,36 +200,32 @@ class BertAnalyzer():
     # Return the actual model function in the closure
     return model_fn
 
-  def getRelavance(self,tweet,aspect):
+  def getRelavance(self,tweets,aspects):
     #print("we are called")
+    '''
     input_examples = [run_classifier.InputExample(guid="", text_a = tweet, text_b = aspect, label = "Unrelated")] # here, "" is just a dummy label
     input_features = run_classifier.convert_examples_to_features(input_examples, self.label_list, self.MAX_SEQ_LENGTH, self.tokenizer)
     predict_input_fn = run_classifier.input_fn_builder(features=input_features, seq_length=self.MAX_SEQ_LENGTH, is_training=False, drop_remainder=False)
     predictions = self.n_estimator.predict(predict_input_fn, yield_single_examples=False)
     #print("prediction okay")
 
+
+    label_list = ['Unrelated', 'Related']
     for pred in predictions:
       if(pred['labels']==0):
         return "Unrelated"
       else:
         return "Related"
 '''
-a =getRelavance("All Indian airlines will report significant losses in 1st quarter of this year and may initially ground around 150 planes as shock from #coronavirus pandemic","movies")
-print(a)
-
-
-b = getRelavance("That movie was absolutely awful","movie")
-print(b)
-
-#movie related
-c= getRelavance("That movie was absolutely awful","sports")
-print(c)
-
-#aviation related
-d= getRelavance("All Indian airlines will report significant losses in 1st quarter of this year and may initially ground around 150 planes as shock from #coronavirus pandemic","aviation")
-print(d)
-
-#related
-e = getRelavance("South Korea’s ruling political party announces a Green New Deal manifesto to be included in legislation, including discontinuation of coal project financing and introduction of a carbon tax. Go climate lea","politics")
-print(e)
-'''
+    labels = ["Unrelated", "Related"]
+    data2 = zip(tweets, aspects)
+    input_examples = [run_classifier.InputExample(guid="", text_a = x, text_b = y, label = "Unrelated") for x, y in data2] # here, "" is just a dummy label
+    input_features = run_classifier.convert_examples_to_features(input_examples, self.label_list, self.MAX_SEQ_LENGTH, self.tokenizer)
+    predict_input_fn = run_classifier.input_fn_builder(features=input_features, seq_length=self.MAX_SEQ_LENGTH, is_training=False, drop_remainder=False)
+    predictions = self.n_estimator.predict(predict_input_fn)
+    i = 0
+    results = list()
+    for pred in predictions:
+        results.append((tweets[i], aspects[i], labels[pred['labels']]))
+        i += 1
+    return results
