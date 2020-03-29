@@ -18,7 +18,7 @@ class BertAnalyzer():
     # label_list is the list of labels, i.e. True, False or 0, 1 or 'dog', 'cat'
     self.label_list = ['Unrelated', 'Related']
   
-    self.OUTPUT_DIR = "./output"
+    self.OUTPUT_DIR = "./models"
     print("output set")
     # This is a path to an uncased (all lowercase) version of BERT
     self.BERT_MODEL_HUB = "https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1"
@@ -40,7 +40,7 @@ class BertAnalyzer():
     # We'll set sequences to be at most 128 tokens long.
     self.MAX_SEQ_LENGTH = 256
     
-    with open("bert_tokenizer.pickle","rb") as handle:
+    with open("tokenizer.pickle","rb") as handle:
       self.tokenizer = pickle.load(handle) 
 
     #print("tokenizer")
@@ -216,7 +216,8 @@ class BertAnalyzer():
         return "Unrelated"
       else:
         return "Related"
-'''
+
+    '''
     labels = ["Unrelated", "Related"]
     data2 = zip(tweets, aspects)
     input_examples = [run_classifier.InputExample(guid="", text_a = x, text_b = y, label = "Unrelated") for x, y in data2] # here, "" is just a dummy label
